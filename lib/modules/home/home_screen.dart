@@ -218,6 +218,7 @@ class HomeScreen extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
             Image(
+
               image: NetworkImage(HomeCubit.get(context).categories[index].icon),
             ),
             Text(
