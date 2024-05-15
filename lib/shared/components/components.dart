@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:proj1/modules/restaurant/restaurants_cubit.dart';
 
+import '../../models/restaurant_model.dart';
 import '../style/color.dart';
 void navigateAndFinish(context,widget) =>
     Navigator.pushAndRemoveUntil(
@@ -180,6 +181,101 @@ Future<void> showFavoriteDialog({context,int? index}) {
         ],
       );
     },
+  );
+}
+Widget  buildListRestaurantItem(
+    {
+      required BuildContext context,
+      required Function() onPress,
+      required int index,
+      required  IconData? icon,
+      required List<RestaurantItemModel> restaurants ,
+      favVisible = false,
+    })
+{
+  return Container(
+    height: 112,
+    width: double.infinity,
+    decoration: myBoxShadow(context),
+    child: Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Container(
+          width: 125,
+          height: 100,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(10),
+            image: DecorationImage(
+                fit: BoxFit.cover,
+                image: NetworkImage(restaurants[index].picture)
+            ),
+          ),
+        ),
+        Expanded(
+          flex: 2,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 5),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                Text(
+                  restaurants[index].name,
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 2,
+                  style: Theme
+                      .of(context)
+                      .textTheme
+                      .bodyMedium,
+                ),
+
+                Text(
+                  restaurants[index].address,
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 2,
+                  style: Theme
+                      .of(context)
+                      .textTheme
+                      .bodySmall,
+                ),
+              ],
+            ),
+          ),
+        ),
+        Expanded(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Visibility(
+                visible: favVisible,
+                child: TextButton(
+                  onPressed: () async {
+                    return await showFavoriteDialog(context: context,);
+                  },
+                  child: Text(
+                    'add to favorite',
+                    style: Theme
+                        .of(context)
+                        .textTheme
+                        .bodySmall!
+                        .copyWith(
+                        color: defaultColor
+                    ),
+                  ),
+                ),
+              ),
+              IconButton(
+                onPressed: onPress,
+                icon: Icon(
+                  icon,
+                  color: defaultColor,
+                ),
+              ),
+            ],
+          ),
+        )
+      ],
+    ),
   );
 }
 Widget buildListItemItem(

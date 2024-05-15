@@ -1,19 +1,31 @@
-class MealModel{
+class FoodModel {
+  final int id;
   final String name;
-  final String img;
+  final String picture;
   final String price;
-  MealModel({required this.name,required this.price,required this.img,});
-  MealModel.fromJson({required this.name,required this.price,required this.img,});
+  final int restaurant;
+  final int category;
+
+  FoodModel({required this.id, required this.name,required this.picture,required this.price,required this.restaurant,required this.category, });
+
+  factory FoodModel.fromJson(Map<String, dynamic> json) {
+    return FoodModel(
+      id: json['id'],
+      name: json['name'],
+      picture: json['picture'],
+      price: json['price'],
+      restaurant: json['restaurant'],
+      category: json['category'],
+    );
+  }
 }
-List<MealModel> meals=[
-  MealModel(name: 'Meal1', price: '25.00\$', img: 'assets/images/burger.png'),
-  MealModel(name: 'Meal2', price: '25.00\$', img: 'assets/images/burger.png'),
-  MealModel(name: 'Meal3', price: '25.00\$', img: 'assets/images/burger.png'),
-  MealModel(name: 'Meal4', price: '25.00\$', img: 'assets/images/burger.png'),
-  MealModel(name: 'Meal5', price: '25.00\$', img: 'assets/images/burger.png'),
-  MealModel(name: 'Meal6', price: '25.00\$', img: 'assets/images/burger.png'),
-  MealModel(name: 'Meal7', price: '25.00\$', img: 'assets/images/burger.png'),
-  MealModel(name: 'Meal8', price: '25.00\$', img: 'assets/images/burger.png'),
-  MealModel(name: 'Meal9', price: '25.00\$', img: 'assets/images/burger.png'),
-  MealModel(name: 'Meal10', price: '25.00\$', img: 'assets/images/burger.png'),
-];
+class FoodByCategoryModel {
+  final List<FoodModel> foodByCategory;
+
+  FoodByCategoryModel({required this.foodByCategory});
+
+  factory FoodByCategoryModel.fromJson(List<dynamic> json) {
+    List<FoodModel> foodByCategory = json.map((item) => FoodModel.fromJson(item)).toList();
+    return FoodByCategoryModel(foodByCategory: foodByCategory);
+  }
+}

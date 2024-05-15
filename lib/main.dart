@@ -9,6 +9,7 @@ import 'package:proj1/modules/home/home_screen.dart';
 import 'package:proj1/modules/on_boarding/onBoarding_screen.dart';
 import 'package:proj1/modules/orders/orders_screen.dart';
 import 'package:proj1/modules/restaurant/restaurants_cubit.dart';
+import 'package:proj1/modules/splash/splash_screen.dart';
 import 'package:proj1/shared/network/local/cache_helper.dart';
 import 'package:proj1/shared/network/remote/dio_helper.dart';
 import 'package:proj1/shared/style/themes.dart';
@@ -21,11 +22,32 @@ void main()async {
   Bloc.observer = MyBlocObserver();
   await CacheHelper.init();
   bool ? isDark=CacheHelper.getData(key: 'isDark');
-  runApp(MyApp(isDark??false));
+  Widget widget;
+  String ? token=CacheHelper.getData(key: 'token');
+  bool? onBoarding=CacheHelper.getData(key: 'onBoarding');
+  if(onBoarding!=null&&onBoarding){
+    print("onBoarding");
+    print(onBoarding);
+    print('token:$token');
+    if(token!=null){
+      widget=HomeLayout();
+    }else{
+      widget=LoginScreen();
+    }
+  }else{
+    widget=SplashScreen();
+  }
+  runApp(
+      MyApp(
+        isDark??false,
+        widget,
+      ),
+  );
 }
 class MyApp extends StatelessWidget {
-    bool isDark=false;
-   MyApp(this.isDark);
+    final bool isDark;
+    final Widget startWidget;
+   MyApp(this.isDark,this.startWidget);
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
@@ -36,7 +58,8 @@ class MyApp extends StatelessWidget {
         },),
         BlocProvider(create: (context){return RestaurantCubit()..getFood()..getFromSp();}),
         BlocProvider(create: (context) => FavoriteCubit(),),
-        BlocProvider(create: (context) => HomeCubit()..getBanners()..getCategories(),),
+        BlocProvider(create: (context) => HomeCubit()..getBanners()..getCategories()..getFoodByCategory(1)..getRestaurants(),),
+        BlocProvider(create: (context) => RestaurantCubit()),
       ],
       child: BlocConsumer<AppCubit,AppStates>(
         listener: (BuildContext context, state) {  },
@@ -46,7 +69,7 @@ class MyApp extends StatelessWidget {
             theme: lightTheme,
             darkTheme: darkTheme,
             debugShowCheckedModeBanner: false,
-            home:  HomeLayout(),
+            home: startWidget,
           );
         },
       ),

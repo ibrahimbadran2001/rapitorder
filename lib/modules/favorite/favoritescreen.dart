@@ -117,7 +117,7 @@ class Favorite extends StatelessWidget {
                                 child: buildListItemItem(
                                   context: context,
                                   onPress: () {
-                                    navigateTo(context, Item());
+                                    //navigateTo(context, MealScreen());
                                   },
                                   image:
                                       '${RestaurantCubit.get(context).favoriteFood[index].imageUrl}',

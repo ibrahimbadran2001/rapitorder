@@ -14,6 +14,9 @@ class CacheHelper{
     if(value is int) return await sharedPreference!.setInt(key, value);
     return await sharedPreference!.setDouble(key, value);
   }
+  static Future<bool>  removeData({required String key})async{
+   return await sharedPreference!.remove(key);
+  }
   static Future<bool> saveStringList({required String key ,required List <String> list})async{
     return await sharedPreference!.setStringList(key, list);
   }

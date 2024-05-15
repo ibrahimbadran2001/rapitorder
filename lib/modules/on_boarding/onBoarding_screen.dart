@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:proj1/shared/components/components.dart';
 import 'package:proj1/layout/login/login_screen.dart';
+import 'package:proj1/shared/network/local/cache_helper.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 class BoardingModel {
   final String title;
@@ -22,7 +23,18 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
   ];
 
   var boardController = PageController();
+  void submit(){
+    CacheHelper.saveData(
+        key: 'onBoarding',
+        value: true,
+    ).then(
+            (value){
+              if(value){
+                navigateAndFinish(context, LoginScreen());
+              }
+            });
 
+  }
   @override
   Widget build(BuildContext context) {
     return Theme(
@@ -37,7 +49,9 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
           centerTitle: true,
           actions: [
             TextButton(
-              onPressed: () {navigateAndFinish(context, LoginScreen());},
+              onPressed: () {
+                submit();
+                },
               child: Text(
                 'Skip',
                 style: TextStyle(
@@ -126,7 +140,7 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
             IconButton(
               onPressed: (){
                 if(isLast){
-                  navigateAndFinish(context, LoginScreen());
+                  submit();
                 }else{
                   boardController.nextPage(
                     duration: Duration(milliseconds: 500),

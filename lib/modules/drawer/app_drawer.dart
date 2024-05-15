@@ -5,6 +5,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:proj1/layout/home_layout/cubit.dart';
 import 'package:proj1/layout/login/login_screen.dart';
 import 'package:proj1/modules/profile/profile_screen.dart';
+import 'package:proj1/shared/network/local/cache_helper.dart';
 import 'package:proj1/shared/style/color.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:url_launcher/url_launcher_string.dart';
@@ -93,6 +94,12 @@ class _AppDrawerState extends State<AppDrawer> {
                   text: 'Log out',
                   width: double.infinity,
                   onPress: (){
+                    CacheHelper.removeData(key: 'token').then(
+                            (value){
+                              if(value){
+                                navigateAndFinish(context, LoginScreen());
+                              }
+                            });
                   },
               ),
             ),

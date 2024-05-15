@@ -4,12 +4,50 @@ import 'package:proj1/modules/restaurant/restaurant_states.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../models/data_model.dart';
+import '../../models/restaurant_detail_model.dart';
+import '../../models/restaurant_food_model.dart';
 import '../../shared/network/local/cache_helper.dart';
 import '../../shared/network/remote/dio_helper.dart';
+import '../../shared/network/remote/end_points.dart';
 
 class RestaurantCubit extends Cubit<RestaurantStates>{
   RestaurantCubit() : super(RestaurantInitialState());
   static RestaurantCubit get(context) => BlocProvider.of(context);
+  RestaurantItemDetailModel? restaurantsDetial;
+  void getRestaurantsDetial(int id) {
+    emit(GetRestaurantsDetailLoadingState());
+    DioHelper.getData(
+      url: RESTAURANT + id.toString(),
+    ).then((value) {
+      Map<String, dynamic> response = value!.data;
+      RestaurantItemDetailModel restaurantDetialModel =
+      RestaurantItemDetailModel.fromJson(response);
+      restaurantsDetial = restaurantDetialModel;
+      emit(GetRestaurantsDetailSuccessState(restaurantsDetial!));
+    }).catchError((error) {
+      print('============================');
+      print(error.toString());
+      print('============================');
+      emit(GetRestaurantsDetailErrorState(error));
+    });
+  }
+  List<RestaurantFoodModel> restaurantsFood = [];
+
+  void getRestaurantsFood(int id) {
+    emit(GetRestaurantsFoodLoadingState());
+    DioHelper.getData(
+      url: RESTAURANT_FOOD + id.toString(),
+    ).then((value) {
+      List<dynamic> responseData = List.from(value!.data);
+      RestaurantFood restaurantModel = RestaurantFood.fromJson(responseData);
+      print('+++++++++++++++++');
+      restaurantsFood = restaurantModel.restaurentFood;
+      print('++++++++++++++');
+      emit(GetRestaurantsFoodSuccessState());
+    }).catchError((erorr) {
+      emit(GetRestaurantsFoodErrorState(erorr));
+    });
+  }
   List<DataModel> foodData=[];
   void getFood(){
     DioHelper.getFavoriteFoodData(

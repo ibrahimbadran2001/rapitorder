@@ -6,6 +6,8 @@ import 'package:proj1/layout/login/login_cubit.dart';
 import 'package:proj1/modules/forget_password/forgoet_password_screen.dart';
 import 'package:proj1/modules/home/home_screen.dart';
 import 'package:proj1/modules/register/register_screen.dart';
+import 'package:proj1/shared/components/constants.dart';
+import 'package:proj1/shared/network/local/cache_helper.dart';
 import 'package:proj1/shared/style/color.dart';
 import '../../shared/components/components.dart';
 import '../../shared/style/themes.dart';
@@ -25,6 +27,11 @@ class LoginScreen extends StatelessWidget {
            if(state is CustomerLoginSuccessState){
              if(state.model.status){
                print(state.model.status);
+               CacheHelper.saveData(key: 'token', value: state.model.data.token).then(
+                       (value) => {
+                         token=state.model.data.token,
+                     navigateAndFinish(context,HomeLayout()),
+                   });
                Fluttertoast.showToast(
                  msg: state.model.message,
                  toastLength: Toast.LENGTH_LONG,

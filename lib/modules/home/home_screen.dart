@@ -6,11 +6,15 @@ import 'package:proj1/models/categories_model.dart';
 import 'package:proj1/modules/drawer/app_drawer.dart';
 import 'package:proj1/modules/home/home_cubit.dart';
 import 'package:proj1/modules/home/home_states.dart';
+import 'package:proj1/modules/meal/meal_cubit.dart';
+import 'package:proj1/modules/meal/meal_screen.dart';
 import 'package:proj1/modules/search/search_screen.dart';
 import 'package:proj1/shared/components/components.dart';
-import 'package:proj1/models/food_model.dart';
+import 'package:proj1/models/meal_model.dart';
 import 'package:proj1/shared/style/color.dart';
+import '../../models/food_model.dart';
 import '../restaurant/restaurant_screen.dart';
+import '../restaurant/restaurants_cubit.dart';
 class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -111,8 +115,9 @@ class HomeScreen extends StatelessWidget {
                           itemBuilder: (context, index) =>
                               GestureDetector(
                                 onTap: () {
-                                  cubit.selectedIndex = index;
+                                  cubit.setCurrentIndex(index);
                                   cubit.scrollToSelectedIndex(index, context);
+                                  cubit.getFoodByCategory(cubit.categories[index].id);
                                 },
                                 child: buildCategoryItem(
                                     context, cubit.selectedIndex, index,
@@ -133,21 +138,29 @@ class HomeScreen extends StatelessWidget {
                   SizedBox(
                     height: 10.0,
                   ),
-                  Container(
-                    //color: Colors.red,
-                    height: 170.0,
-                    child: ListView.separated(
-                      physics: BouncingScrollPhysics(),
-                      scrollDirection: Axis.horizontal,
-                      shrinkWrap: true,
-                      itemBuilder: (context, index) =>
-                          buildFoodItem(context, meals[index]),
-                      separatorBuilder: (context, index) =>
-                          SizedBox(
-                            width: 10,
-                          ),
-                      itemCount: meals.length,
-                    ),
+                  ConditionalBuilder(
+                    condition: state is! GetFoodByCategoryLoadingState,
+                    builder: (BuildContext context) {
+                      return  Container(
+                        //color: Colors.red,
+                        height: 170.0,
+                        child: ListView.separated(
+                          physics: BouncingScrollPhysics(),
+                          scrollDirection: Axis.horizontal,
+                          shrinkWrap: true,
+                          itemBuilder: (context, index) =>
+                              buildFoodItem(context, cubit.foodByCategory[index]),
+                          separatorBuilder: (context, index) =>
+                              SizedBox(
+                                width: 10,
+                              ),
+                          itemCount: cubit.foodByCategory.length,
+                        ),
+                      );
+                    },
+                    fallback: (BuildContext context) {
+                      return Center(child: CircularProgressIndicator(color: defaultColor,));
+                    },
                   ),
                   Padding(
                     padding: const EdgeInsets.all(5.0),
@@ -161,27 +174,36 @@ class HomeScreen extends StatelessWidget {
                   ),
                   Padding(
                     padding: const EdgeInsets.all(5.0),
-                    child: ListView.separated(
-                      shrinkWrap: true,
-                      physics: NeverScrollableScrollPhysics(),
-                      itemBuilder: (context, index) =>
-                          buildListItemItem(
-                            context: context,
-                            onPress: () {
-                              navigateTo(context, RestaurantScreen());
-                            },
-                            image: 'assets/images/rest.jpg',
-                            text1: 'Restaurant Name',
-                            text2: 'Restaurant Address',
-                            icon1: Icons.favorite_border,
-                            icon2: Icons.double_arrow_outlined,
-                            favVisible: true,
-                          ),
-                      separatorBuilder: (context, index) =>
-                          SizedBox(
+                    child: ConditionalBuilder(
+                      condition: state is! GetRestaurantsLoadingState,
+                      builder: (context) {
+                        return ListView.separated(
+                          shrinkWrap: true,
+                          physics: NeverScrollableScrollPhysics(),
+                          itemBuilder: (context, index) =>
+                              buildListRestaurantItem(
+                                context: context,
+                                icon: Icons.double_arrow_sharp,
+                                onPress: () {
+                                  RestaurantCubit.get(context).getRestaurantsDetial(HomeCubit.get(context).restaurants[index].id);
+                                  //  RestaurantCubit.get(context).getRestaurantsFood(HomeCubit.get(context).restaurants[index].id);
+
+                                  navigateTo(context, RestaurantScreen());
+                                },
+                                restaurants: HomeCubit.get(context).restaurants,
+                                favVisible: true,
+                                index: index,
+                              ),
+                          separatorBuilder: (context, index) => SizedBox(
                             height: 10,
                           ),
-                      itemCount: 10,
+                          itemCount: HomeCubit.get(context).restaurants.length,
+                        );
+                      },
+                      fallback: (context) => Center(
+                          child: CircularProgressIndicator(
+                            color: defaultColor,
+                          )),
                     ),
                   ),
                 ],
@@ -215,32 +237,40 @@ class HomeScreen extends StatelessWidget {
               .cardColor,
         ),
         child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
-            Image(
-
-              image: NetworkImage(HomeCubit.get(context).categories[index].icon),
+            SizedBox(width: 5,),
+            Container(
+              width: 50,
+              height:50 ,
+              decoration: BoxDecoration(
+                image: DecorationImage(
+                    image:NetworkImage(HomeCubit.get(context).categories[index].icon),
+                  fit: BoxFit.contain,
+                ),
+              ),
             ),
-            Text(
-              HomeCubit.get(context).categories[index].name,
-              overflow: TextOverflow.ellipsis,
-              textAlign: TextAlign.center,
-              maxLines: 2,
-              style: Theme
-                  .of(context)
-                  .textTheme
-                  .bodyMedium,
+            Expanded(
+              child: Text(
+                HomeCubit.get(context).categories[index].name,
+                overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.center,
+                maxLines: 2,
+                style: Theme
+                    .of(context)
+                    .textTheme
+                    .bodyMedium,
+              ),
             ),
           ],
         ),
       );
 
-  Widget buildFoodItem(context, MealModel mealModel) {
+  Widget buildFoodItem(context,FoodModel model,) {
     return Padding(
       padding: const EdgeInsets.all(5.0),
       child: GestureDetector(
         onTap: () {
-          //navigateTo(context, Item());
+          navigateTo(context, MealScreen(id: model.id,));
         },
         onDoubleTap: () async {
           return await showFavoriteDialog(context: context);
@@ -262,14 +292,14 @@ class HomeScreen extends StatelessWidget {
                   border: Border.all(color: Color.fromRGBO(249, 136, 31, 1)),
                   image: DecorationImage(
                     fit: BoxFit.cover,
-                    image: AssetImage(
-                      '${mealModel.img}',
+                    image: NetworkImage(
+                      model.picture,
                     ),
                   ),
                 ),
               ),
               Text(
-                '${mealModel.name}',
+                model.name,
                 overflow: TextOverflow.ellipsis,
                 textAlign: TextAlign.center,
                 maxLines: 1,
@@ -285,7 +315,7 @@ class HomeScreen extends StatelessWidget {
                     Expanded(
                       flex: 2,
                       child: Text(
-                        '200000000000.0\$',
+                        model.price.toString(),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         textAlign: TextAlign.center,
